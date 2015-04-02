@@ -2,28 +2,35 @@ package mpu
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 )
 
+// Config enable various options for the uploader
 type Config struct {
 	Gzip bool
 }
 
+// DefaultConfig defaults for the uploader
 func DefaultConfig() *Config {
 	return &Config{true}
 }
 
+// UploaderBuilder builds upload requests with a basic setup
 type UploaderBuilder struct {
 	config *Config
 }
 
+// Uploader make a new upload builder
 func Uploader(config *Config) *UploaderBuilder {
 	return &UploaderBuilder{config}
 }
 
+// NewFileRequest build a new file upload http request with a multi part form consisting of the extra fields
+// and the contents of the file loaded from the supplied path.
 func (ub *UploaderBuilder) NewFileRequest(uri string, extraParams map[string]string, paramName, filePath string) (*http.Request, error) {
 
 	file, err := os.Open(filePath)
@@ -31,36 +38,25 @@ func (ub *UploaderBuilder) NewFileRequest(uri string, extraParams map[string]str
 		return nil, err
 	}
 
-	fileContents, err := ioutil.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-
-	fi, err := file.Stat()
-	if err != nil {
-		return nil, err
-	}
-
-	file.Close()
-
 	body := new(bytes.Buffer)
+
 	writer := multipart.NewWriter(body)
-
-	part, err := writer.CreateFormFile(paramName, fi.Name())
-	if err != nil {
-		return nil, err
-	}
-
-	part.Write(fileContents)
 
 	for key, val := range extraParams {
 		_ = writer.WriteField(key, val)
 	}
 
-	err = writer.Close()
+	part, err := writer.CreateFormFile(paramName, file.Name())
 	if err != nil {
 		return nil, err
 	}
+
+	written, err := io.Copy(part, file)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("wrote %d", written)
 
 	return http.NewRequest("POST", uri, body)
 }
