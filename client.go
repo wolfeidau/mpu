@@ -21,12 +21,13 @@ func DefaultConfig() *Config {
 
 // UploaderBuilder builds upload requests with a basic setup
 type UploaderBuilder struct {
+	http.Client
 	config *Config
 }
 
 // Uploader make a new upload builder
 func Uploader(config *Config) *UploaderBuilder {
-	return &UploaderBuilder{config}
+	return &UploaderBuilder{http.Client{}, config}
 }
 
 // NewFileRequest build a new file upload http request with a multi part form consisting of the extra fields

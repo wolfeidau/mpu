@@ -18,7 +18,6 @@ var (
 	app    = kingpin.New("uploader", "A command-line file upload example.")
 	client = app.Command("client", "uploader client.")
 	server = app.Command("server", "uploader server.")
-	cl     = &http.Client{}
 )
 
 func main() {
@@ -50,7 +49,7 @@ func startClient() {
 
 	start := time.Now()
 
-	resp, err := cl.Do(req)
+	resp, err := uploader.Do(req)
 
 	if err != nil {
 		log.Fatalf("post failed: %s", err)
