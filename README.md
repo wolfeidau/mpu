@@ -11,34 +11,37 @@ go get github.com/wolfeidau/mpu
 
 # Client Example
 
-```
+```go
 
-uri := "https://localhost:9090/uploads"
+	uri := "https://localhost:9090/uploads"
+	cl  := &http.Client{}
 
-extraParams := map[string]int{
-    "author":   "Mark Wolfe",
-    "hostname": "wolfesmachine.local",
-}
 
-uploader := mpu.Uploader(http.Client{}, mpu.DefaultConfig()) // gzip encoding by default.
+	extraParams := map[string]string{
+		"author":   "Mark Wolfe",
+		"hostname": "wolfesmachine.local",
+	}
 
-req, err := uploader.NewFileRequest(uri, extraParams, "fileUpload", "/tmp/output.log")
+	uploader := mpu.Uploader(mpu.DefaultConfig()) // gzip encoding by default.
 
-if err != nil {
-	log.Fatalf("building req failed: %s", err)
-}
+	req, err := uploader.NewFileRequest(uri, extraParams, "fileUpload", "/tmp/output.log")
 
-req.ContentType("text/csv")
+	if err != nil {
+		log.Fatalf("building req failed: %s", err)
+	}
 
-client := &http.Client{}
+	start := time.Now()
 
-resp, err := client.Do(request)
+	resp, err := cl.Do(req)
 
-if err != nil {
-	log.Fatalf("post failed: %s", err)
-}
+	if err != nil {
+		log.Fatalf("post failed: %s", err)
+	}
 
-log.Printf("success status=%d msg=%s", resp.StatusCode, resp.Body)
+	defer resp.Body.Close()
+
+	log.Printf("Success status=%d timetaken=%s", resp.StatusCode, time.Now().Sub(start))
+
 ```
 
 

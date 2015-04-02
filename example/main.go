@@ -58,13 +58,7 @@ func startClient() {
 
 	defer resp.Body.Close()
 
-	msg, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		log.Fatalf("read body failed: %s", err)
-	}
-
-	log.Printf("success status=%d msg=%s timetaken=%s", resp.StatusCode, string(msg), time.Now().Sub(start))
+	log.Printf("success status=%d timetaken=%s", resp.StatusCode, time.Now().Sub(start))
 
 }
 
