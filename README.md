@@ -20,10 +20,11 @@ extraParams := map[string]string{
 	"hostname": "wolfesmachine.local",
 }
 
-uploader := mpu.Uploader(mpu.DefaultConfig()) // gzip encoding by default.
+uploader := mpu.Uploader(mpu.DefaultConfig()) // gzip coming soon!
 
 req, err := uploader.NewFileRequest(uri, extraParams, "fileUpload", "/tmp/output.log")
 
+// is this a local issue that I probably want to quit based on.
 if err != nil {
 	log.Fatalf("building req failed: %s", err)
 }
@@ -32,6 +33,7 @@ start := time.Now()
 
 resp, err := uploader.Do(req)
 
+// is this a network issue which is "hopefully" transient.
 if err != nil {
 	log.Fatalf("post failed: %s", err)
 }
